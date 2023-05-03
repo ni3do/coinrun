@@ -1,12 +1,15 @@
+import os
+
+import joblib
+
 from coinrun.config import Config
 
-import os
-import joblib
 
 def load_for_setup_if_necessary():
     restore_file(Config.RESTORE_ID)
 
-def restore_file(restore_id, load_key='default'):
+
+def restore_file(restore_id, load_key="default"):
     if restore_id is not None:
         load_file = Config.get_load_filename(restore_id=restore_id)
         filepath = file_to_path(load_file)
@@ -14,7 +17,7 @@ def restore_file(restore_id, load_key='default'):
 
         Config.set_load_data(load_data, load_key=load_key)
 
-        restored_args = load_data['args']
+        restored_args = load_data["args"]
         sub_dict = {}
         res_keys = Config.RES_KEYS
 
@@ -22,12 +25,14 @@ def restore_file(restore_id, load_key='default'):
             if key in restored_args:
                 sub_dict[key] = restored_args[key]
             else:
-                print('warning key %s not restored' % key)
+                print("warning key %s not restored" % key)
 
         Config.parse_args_dict(sub_dict)
-    
+
     from coinrun.coinrunenv import init_args_and_threads
+
     init_args_and_threads(4)
+
 
 def setup_and_load(use_cmd_line_args=True, **kwargs):
     """
@@ -41,6 +46,7 @@ def setup_and_load(use_cmd_line_args=True, **kwargs):
     load_for_setup_if_necessary()
 
     return args
+
 
 def file_to_path(filename):
     return os.path.join(Config.WORKDIR, filename)

@@ -3,30 +3,32 @@ This is a copy of PPO from openai/baselines (https://github.com/openai/baselines
 """
 
 import time
+from collections import deque
+
 import joblib
 import numpy as np
 import tensorflow as tf
-from collections import deque
-
 from mpi4py import MPI
 
-from coinrun.tb_utils import TB_Writer
 import coinrun.main_utils as utils
-
 from coinrun.config import Config
+from coinrun.tb_utils import TB_Writer
 
 mpi_print = utils.mpi_print
 
+from baselines.common.mpi_util import sync_from_root
 from baselines.common.runners import AbstractEnvRunner
 from baselines.common.tf_util import initialize
-from baselines.common.mpi_util import sync_from_root
+
 
 class MpiAdamOptimizer(tf.train.AdamOptimizer):
     """Adam optimizer that averages gradients across mpi processes."""
+
     def __init__(self, comm, **kwargs):
         self.comm = comm
         self.train_frac = 1.0 - Config.get_test_frac()
         tf.train.AdamOptimizer.__init__(self, **kwargs)
+
     def compute_gradients(self, loss, var_list, **kwargs):
         grads_and_vars = tf.train.AdamOptimizer.compute_gradients(self, loss, var_list, **kwargs)
         grads_and_vars = [(g, v) for g, v in grads_and_vars if g is not None]
@@ -50,14 +52,27 @@ class MpiAdamOptimizer(tf.train.AdamOptimizer):
         avg_flat_grad = tf.py_func(_collect_grads, [flat_grad], tf.float32)
         avg_flat_grad.set_shape(flat_grad.shape)
         avg_grads = tf.split(avg_flat_grad, sizes, axis=0)
-        avg_grads_and_vars = [(tf.reshape(g, v.shape), v)
-                    for g, (_, v) in zip(avg_grads, grads_and_vars)]
+        avg_grads_and_vars = [
+            (tf.reshape(g, v.shape), v) for g, (_, v) in zip(avg_grads, grads_and_vars)
+        ]
 
         return avg_grads_and_vars
 
+
 class Model(object):
-    def __init__(self, *, policy, ob_space, ac_space, nbatch_act, nbatch_train,
-                nsteps, ent_coef, vf_coef, max_grad_norm):
+    def __init__(
+        self,
+        *,
+        policy,
+        ob_space,
+        ac_space,
+        nbatch_act,
+        nbatch_train,
+        nsteps,
+        ent_coef,
+        vf_coef,
+        max_grad_norm
+    ):
         sess = tf.get_default_session()
 
         train_model = policy(sess, ob_space, ac_space, nbatch_train, nsteps)
@@ -76,29 +91,29 @@ class Model(object):
         entropy = tf.reduce_mean(train_model.pd.entropy())
 
         vpred = train_model.vf
-        vpredclipped = OLDVPRED + tf.clip_by_value(train_model.vf - OLDVPRED, - CLIPRANGE, CLIPRANGE)
+        vpredclipped = OLDVPRED + tf.clip_by_value(train_model.vf - OLDVPRED, -CLIPRANGE, CLIPRANGE)
         vf_losses1 = tf.square(vpred - R)
         vf_losses2 = tf.square(vpredclipped - R)
-        vf_loss = .5 * tf.reduce_mean(tf.maximum(vf_losses1, vf_losses2))
+        vf_loss = 0.5 * tf.reduce_mean(tf.maximum(vf_losses1, vf_losses2))
         ratio = tf.exp(OLDNEGLOGPAC - neglogpac)
         pg_losses = -ADV * ratio
         pg_losses2 = -ADV * tf.clip_by_value(ratio, 1.0 - CLIPRANGE, 1.0 + CLIPRANGE)
         pg_loss = tf.reduce_mean(tf.maximum(pg_losses, pg_losses2))
-        approxkl = .5 * tf.reduce_mean(tf.square(neglogpac - OLDNEGLOGPAC))
+        approxkl = 0.5 * tf.reduce_mean(tf.square(neglogpac - OLDNEGLOGPAC))
         clipfrac = tf.reduce_mean(tf.to_float(tf.greater(tf.abs(ratio - 1.0), CLIPRANGE)))
 
         params = tf.trainable_variables()
-        weight_params = [v for v in params if '/b' not in v.name]
+        weight_params = [v for v in params if "/b" not in v.name]
 
         total_num_params = 0
 
         for p in params:
             shape = p.get_shape().as_list()
             num_params = np.prod(shape)
-            mpi_print('param', p, num_params)
+            mpi_print("param", p, num_params)
             total_num_params += num_params
 
-        mpi_print('total num params:', total_num_params)
+        mpi_print("total num params:", total_num_params)
 
         l2_loss = tf.reduce_sum([tf.nn.l2_loss(v) for v in weight_params])
 
@@ -125,16 +140,31 @@ class Model(object):
             adv_std = np.std(advs, axis=0, keepdims=True)
             advs = (advs - adv_mean) / (adv_std + 1e-8)
 
-            td_map = {train_model.X:obs, A:actions, ADV:advs, R:returns, LR:lr,
-                    CLIPRANGE:cliprange, OLDNEGLOGPAC:neglogpacs, OLDVPRED:values}
+            td_map = {
+                train_model.X: obs,
+                A: actions,
+                ADV: advs,
+                R: returns,
+                LR: lr,
+                CLIPRANGE: cliprange,
+                OLDNEGLOGPAC: neglogpacs,
+                OLDVPRED: values,
+            }
             if states is not None:
                 td_map[train_model.S] = states
                 td_map[train_model.M] = masks
             return sess.run(
-                [pg_loss, vf_loss, entropy, approxkl, clipfrac, l2_loss, _train],
-                td_map
+                [pg_loss, vf_loss, entropy, approxkl, clipfrac, l2_loss, _train], td_map
             )[:-1]
-        self.loss_names = ['policy_loss', 'value_loss', 'policy_entropy', 'approxkl', 'clipfrac', 'l2_loss']
+
+        self.loss_names = [
+            "policy_loss",
+            "value_loss",
+            "policy_entropy",
+            "approxkl",
+            "clipfrac",
+            "l2_loss",
+        ]
 
         def save(save_path):
             ps = sess.run(params)
@@ -159,11 +189,12 @@ class Model(object):
         if Config.SYNC_FROM_ROOT:
             if MPI.COMM_WORLD.Get_rank() == 0:
                 initialize()
-            
+
             global_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="")
-            sync_from_root(sess, global_variables) #pylint: disable=E1101
+            sync_from_root(sess, global_variables)  # pylint: disable=E1101
         else:
             initialize()
+
 
 class Runner(AbstractEnvRunner):
     def __init__(self, *, env, model, nsteps, gamma, lam):
@@ -173,14 +204,16 @@ class Runner(AbstractEnvRunner):
 
     def run(self):
         # Here, we init the lists that will contain the mb of experiences
-        mb_obs, mb_rewards, mb_actions, mb_values, mb_dones, mb_neglogpacs = [],[],[],[],[],[]
+        mb_obs, mb_rewards, mb_actions, mb_values, mb_dones, mb_neglogpacs = [], [], [], [], [], []
         mb_states = self.states
         epinfos = []
         # For n in range number of steps
         for _ in range(self.nsteps):
             # Given observations, get action value and neglopacs
             # We already have self.obs because Runner superclass run self.obs[:] = env.reset() on init
-            actions, values, self.states, neglogpacs = self.model.step(self.obs, self.states, self.dones)
+            actions, values, self.states, neglogpacs = self.model.step(
+                self.obs, self.states, self.dones
+            )
             mb_obs.append(self.obs.copy())
             mb_actions.append(actions)
             mb_values.append(values)
@@ -191,10 +224,11 @@ class Runner(AbstractEnvRunner):
             # Infos contains a ton of useful informations
             self.obs[:], rewards, self.dones, infos = self.env.step(actions)
             for info in infos:
-                maybeepinfo = info.get('episode')
-                if maybeepinfo: epinfos.append(maybeepinfo)
+                maybeepinfo = info.get("episode")
+                if maybeepinfo:
+                    epinfos.append(maybeepinfo)
             mb_rewards.append(rewards)
-        #batch of steps to batch of rollouts
+        # batch of steps to batch of rollouts
         mb_obs = np.asarray(mb_obs, dtype=self.obs.dtype)
         mb_rewards = np.asarray(mb_rewards, dtype=np.float32)
         mb_actions = np.asarray(mb_actions)
@@ -212,14 +246,18 @@ class Runner(AbstractEnvRunner):
                 nextnonterminal = 1.0 - self.dones
                 nextvalues = last_values
             else:
-                nextnonterminal = 1.0 - mb_dones[t+1]
-                nextvalues = mb_values[t+1]
+                nextnonterminal = 1.0 - mb_dones[t + 1]
+                nextvalues = mb_values[t + 1]
             delta = mb_rewards[t] + self.gamma * nextvalues * nextnonterminal - mb_values[t]
             mb_advs[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
         mb_returns = mb_advs + mb_values
 
-        return (*map(sf01, (mb_obs, mb_returns, mb_dones, mb_actions, mb_values, mb_neglogpacs)),
-            mb_states, epinfos)
+        return (
+            *map(sf01, (mb_obs, mb_returns, mb_dones, mb_actions, mb_values, mb_neglogpacs)),
+            mb_states,
+            epinfos,
+        )
+
 
 def sf01(arr):
     """
@@ -232,13 +270,29 @@ def sf01(arr):
 def constfn(val):
     def f(_):
         return val
+
     return f
 
 
-def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
-            vf_coef=0.5,  max_grad_norm=0.5, gamma=0.99, lam=0.95,
-            log_interval=10, nminibatches=4, noptepochs=4, cliprange=0.2,
-            save_interval=0, load_path=None):
+def learn(
+    *,
+    policy,
+    env,
+    nsteps,
+    total_timesteps,
+    ent_coef,
+    lr,
+    vf_coef=0.5,
+    max_grad_norm=0.5,
+    gamma=0.99,
+    lam=0.95,
+    log_interval=10,
+    nminibatches=4,
+    noptepochs=4,
+    cliprange=0.2,
+    save_interval=0,
+    load_path=None
+):
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     mpi_size = comm.Get_size()
@@ -246,22 +300,34 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
     sess = tf.get_default_session()
     tb_writer = TB_Writer(sess)
 
-    if isinstance(lr, float): lr = constfn(lr)
-    else: assert callable(lr)
-    if isinstance(cliprange, float): cliprange = constfn(cliprange)
-    else: assert callable(cliprange)
+    if isinstance(lr, float):
+        lr = constfn(lr)
+    else:
+        assert callable(lr)
+    if isinstance(cliprange, float):
+        cliprange = constfn(cliprange)
+    else:
+        assert callable(cliprange)
     total_timesteps = int(total_timesteps)
 
     nenvs = env.num_envs
     ob_space = env.observation_space
     ac_space = env.action_space
     nbatch = nenvs * nsteps
-    
+
     nbatch_train = nbatch // nminibatches
 
-    model = Model(policy=policy, ob_space=ob_space, ac_space=ac_space, nbatch_act=nenvs, nbatch_train=nbatch_train,
-                    nsteps=nsteps, ent_coef=ent_coef, vf_coef=vf_coef,
-                    max_grad_norm=max_grad_norm)
+    model = Model(
+        policy=policy,
+        ob_space=ob_space,
+        ac_space=ac_space,
+        nbatch_act=nenvs,
+        nbatch_train=nbatch_train,
+        nsteps=nsteps,
+        ent_coef=ent_coef,
+        vf_coef=vf_coef,
+        max_grad_norm=max_grad_norm,
+    )
 
     utils.load_all_params(sess)
 
@@ -272,7 +338,7 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
     tfirststart = time.time()
     active_ep_buf = epinfobuf100
 
-    nupdates = total_timesteps//nbatch
+    nupdates = total_timesteps // nbatch
     mean_rewards = []
     datapoints = []
 
@@ -287,10 +353,12 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
         can_save = False
 
     def save_model(base_name=None):
-        base_dict = {'datapoints': datapoints}
-        utils.save_params_in_scopes(sess, ['model'], Config.get_save_file(base_name=base_name), base_dict)
+        base_dict = {"datapoints": datapoints}
+        utils.save_params_in_scopes(
+            sess, ["model"], Config.get_save_file(base_name=base_name), base_dict
+        )
 
-    for update in range(1, nupdates+1):
+    for update in range(1, nupdates + 1):
         assert nbatch % nminibatches == 0
         nbatch_train = nbatch // nminibatches
         tstart = time.time()
@@ -298,7 +366,7 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
         lrnow = lr(frac)
         cliprangenow = cliprange(frac)
 
-        mpi_print('collecting rollouts...')
+        mpi_print("collecting rollouts...")
         run_tstart = time.time()
 
         obs, returns, masks, actions, values, neglogpacs, states, epinfos = runner.run()
@@ -307,23 +375,25 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
 
         run_elapsed = time.time() - run_tstart
         run_t_total += run_elapsed
-        mpi_print('rollouts complete')
+        mpi_print("rollouts complete")
 
         mblossvals = []
 
-        mpi_print('updating parameters...')
+        mpi_print("updating parameters...")
         train_tstart = time.time()
 
-        if states is None: # nonrecurrent version
+        if states is None:  # nonrecurrent version
             inds = np.arange(nbatch)
             for _ in range(noptepochs):
                 np.random.shuffle(inds)
                 for start in range(0, nbatch, nbatch_train):
                     end = start + nbatch_train
                     mbinds = inds[start:end]
-                    slices = (arr[mbinds] for arr in (obs, returns, masks, actions, values, neglogpacs))
+                    slices = (
+                        arr[mbinds] for arr in (obs, returns, masks, actions, values, neglogpacs)
+                    )
                     mblossvals.append(model.train(lrnow, cliprangenow, *slices))
-        else: # recurrent version
+        else:  # recurrent version
             assert nenvs % nminibatches == 0
             envinds = np.arange(nenvs)
             flatinds = np.arange(nenvs * nsteps).reshape(nenvs, nsteps)
@@ -334,7 +404,10 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
                     end = start + envsperbatch
                     mbenvinds = envinds[start:end]
                     mbflatinds = flatinds[mbenvinds].ravel()
-                    slices = (arr[mbflatinds] for arr in (obs, returns, masks, actions, values, neglogpacs))
+                    slices = (
+                        arr[mbflatinds]
+                        for arr in (obs, returns, masks, actions, values, neglogpacs)
+                    )
                     mbstates = states[mbenvinds]
                     mblossvals.append(model.train(lrnow, cliprangenow, *slices, mbstates))
 
@@ -343,39 +416,41 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
 
         train_elapsed = time.time() - train_tstart
         train_t_total += train_elapsed
-        mpi_print('update complete')
+        mpi_print("update complete")
 
         lossvals = np.mean(mblossvals, axis=0)
         tnow = time.time()
         fps = int(nbatch / (tnow - tstart))
 
         if update % log_interval == 0 or update == 1:
-            step = update*nbatch
-            rew_mean_10 = utils.process_ep_buf(active_ep_buf, tb_writer=tb_writer, suffix='', step=step)
-            ep_len_mean = np.nanmean([epinfo['l'] for epinfo in active_ep_buf])
-            
-            mpi_print('\n----', update)
+            step = update * nbatch
+            rew_mean_10 = utils.process_ep_buf(
+                active_ep_buf, tb_writer=tb_writer, suffix="", step=step
+            )
+            ep_len_mean = np.nanmean([epinfo["l"] for epinfo in active_ep_buf])
+
+            mpi_print("\n----", update)
 
             mean_rewards.append(rew_mean_10)
             datapoints.append([step, rew_mean_10])
 
-            tb_writer.log_scalar(ep_len_mean, 'ep_len_mean')
-            tb_writer.log_scalar(fps, 'fps')
+            tb_writer.log_scalar(ep_len_mean, "ep_len_mean")
+            tb_writer.log_scalar(fps, "fps")
 
-            mpi_print('time_elapsed', tnow - tfirststart, run_t_total, train_t_total)
-            mpi_print('timesteps', update*nsteps, total_timesteps)
+            mpi_print("time_elapsed", tnow - tfirststart, run_t_total, train_t_total)
+            mpi_print("timesteps", update * nsteps, total_timesteps)
 
-            mpi_print('eplenmean', ep_len_mean)
-            mpi_print('eprew', rew_mean_10)
-            mpi_print('fps', fps)
-            mpi_print('total_timesteps', update*nbatch)
-            mpi_print([epinfo['r'] for epinfo in epinfobuf10])
+            mpi_print("eplenmean", ep_len_mean)
+            mpi_print("eprew", rew_mean_10)
+            mpi_print("fps", fps)
+            mpi_print("total_timesteps", update * nbatch)
+            mpi_print([epinfo["r"] for epinfo in epinfobuf10])
 
             if len(mblossvals):
-                for (lossval, lossname) in zip(lossvals, model.loss_names):
+                for lossval, lossname in zip(lossvals, model.loss_names):
                     mpi_print(lossname, lossval)
                     tb_writer.log_scalar(lossval, lossname)
-            mpi_print('----\n')
+            mpi_print("----\n")
 
         if can_save:
             if save_interval and (update % save_interval == 0):
@@ -384,7 +459,7 @@ def learn(*, policy, env, nsteps, total_timesteps, ent_coef, lr,
             for j, checkpoint in enumerate(checkpoints):
                 if (not saved_key_checkpoints[j]) and (step >= (checkpoint * 1e6)):
                     saved_key_checkpoints[j] = True
-                    save_model(str(checkpoint) + 'M')
+                    save_model(str(checkpoint) + "M")
 
     save_model()
 
