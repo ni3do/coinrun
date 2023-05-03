@@ -14,9 +14,9 @@ import gym
 import gym.spaces
 import numpy as np
 import numpy.ctypeslib as npct
-from baselines import logger
-from baselines.common import mpi_util
-from baselines.common.vec_env import VecEnv
+from coinrun.baselines import logger
+from coinrun.baselines.common import mpi_util
+from coinrun.baselines.common.vec_env import VecEnv
 from mpi4py import MPI
 
 from coinrun.config import Config

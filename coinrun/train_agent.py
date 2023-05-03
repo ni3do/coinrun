@@ -5,7 +5,7 @@ Train an agent using a PPO2 based on OpenAI Baselines.
 import time
 
 import tensorflow.compat.v1 as tf
-from baselines.common import set_global_seeds
+from coinrun.baselines.common import set_global_seeds
 from mpi4py import MPI
 
 import coinrun.main_utils as utils

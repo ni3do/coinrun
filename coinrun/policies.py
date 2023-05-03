@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow.compat.v1 as tf
-from baselines.a2c.utils import batch_to_seq, conv, conv_to_fc, fc, lstm, seq_to_batch
-from baselines.common.distributions import make_pdtype
-from baselines.common.input import observation_input
+from coinrun.baselines.a2c.utils import batch_to_seq, conv, conv_to_fc, fc, lstm, seq_to_batch
+from coinrun.baselines.common.distributions import make_pdtype
+from coinrun.baselines.common.input import observation_input
 
 from coinrun.config import Config
 

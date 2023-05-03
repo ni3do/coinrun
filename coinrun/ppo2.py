@@ -16,9 +16,9 @@ from coinrun.tb_utils import TB_Writer
 
 mpi_print = utils.mpi_print
 
-from baselines.common.mpi_util import sync_from_root
-from baselines.common.runners import AbstractEnvRunner
-from baselines.common.tf_util import initialize
+from coinrun.baselines.common.mpi_util import sync_from_root
+from coinrun.baselines.common.runners import AbstractEnvRunner
+from coinrun.baselines.common.tf_util import initialize
 
 
 class MpiAdamOptimizer(tf.train.AdamOptimizer):

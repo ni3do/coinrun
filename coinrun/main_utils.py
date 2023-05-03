@@ -4,7 +4,7 @@ import platform
 import joblib
 import numpy as np
 import tensorflow.compat.v1 as tf
-from baselines.common.vec_env.vec_frame_stack import VecFrameStack
+from coinrun.baselines.common.vec_env.vec_frame_stack import VecFrameStack
 from mpi4py import MPI
 
 from coinrun import setup_utils, wrappers
