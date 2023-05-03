@@ -4,7 +4,7 @@ Train an agent using a PPO2 based on OpenAI Baselines.
 
 import time
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from baselines.common import set_global_seeds
 from mpi4py import MPI
 

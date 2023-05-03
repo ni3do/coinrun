@@ -7,7 +7,7 @@ from collections import deque
 
 import joblib
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from mpi4py import MPI
 
 import coinrun.main_utils as utils

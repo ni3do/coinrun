@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from baselines.a2c.utils import batch_to_seq, conv, conv_to_fc, fc, lstm, seq_to_batch
 from baselines.common.distributions import make_pdtype
 from baselines.common.input import observation_input
@@ -55,7 +55,7 @@ def impala_cnn(images, depths=[16, 32, 32]):
         return out
 
     def residual_block(inputs):
-        depth = inputs.get_shape()[-1].value
+        depth = inputs.get_shape()[-1]
 
         out = tf.nn.relu(inputs)
 
@@ -183,6 +183,7 @@ class CnnPolicy(object):
 
 def get_policy():
     use_lstm = Config.USE_LSTM
+    print(use_lstm)
 
     if use_lstm == 1:
         policy = LstmPolicy

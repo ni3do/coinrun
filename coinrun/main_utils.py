@@ -3,7 +3,7 @@ import platform
 
 import joblib
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from baselines.common.vec_env.vec_frame_stack import VecFrameStack
 from mpi4py import MPI
 
