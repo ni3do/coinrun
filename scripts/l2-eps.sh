@@ -2,8 +2,8 @@
 
 #SBATCH --job=coinrun-l2-eps
 #SBATCH --time=150:00
-#SBATCH --output=log/l2-eps-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=log/l2-eps-16e-6-%j.err  # where to store error messages
+#SBATCH --output=/cluster/home/%u/coinrun/log/l2-eps-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/l2-eps-16e-6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
 #SBATCH --gpus=rtx_3090:1
 #SBATCH --mem-per-cpu=8G

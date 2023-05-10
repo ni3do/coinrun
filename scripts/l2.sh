@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job=coinrun-l2
-#SBATCH --output=log/l2-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=log/l2-%j.err  # where to store error messages
+#SBATCH --output=/cluster/home/%u/coinrun/log/l2-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/l2-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
 #SBATCH --gpus=rtx_2080_ti:1
 #SBATCH --mem-per-cpu=8G

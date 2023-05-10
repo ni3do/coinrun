@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job=coinrun-eps
-#SBATCH --output=log/eps-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=log/eps-%j.err  # where to store error messages
+#SBATCH --output=/cluster/home/%u/coinrun/log/eps-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/eps-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
 #SBATCH --gpus=rtx_2080_ti:1
 #SBATCH --mem-per-cpu=8G

@@ -2,8 +2,8 @@
 
 #SBATCH --job=cr-base
 #SBATCH --time=150:00
-#SBATCH --output=log/baseline-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=log/baseline-16e6-%j.err  # where to store error messages
+#SBATCH --output=/cluster/home/%u/coinrun/log/baseline-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/baseline-16e6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
 #SBATCH --gpus=rtx_3090:1
 #SBATCH --mem-per-cpu=8G
