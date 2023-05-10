@@ -1,6 +1,5 @@
-gym==0.21.0
+gym==0.26.2
+joblib==1.2.0
 mpi4py==3.1.4
-pyglet==2.0.6
-tensorflow==2.11.0
-torch==2.0.0
-https://github.com/openai/baselines/archive/7139a66d333b94c2dafc4af35f6a8c7598361df6.zip
+pyglet==2.0.7
+tensorflow==2.12.0
