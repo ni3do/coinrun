@@ -6,3 +6,6 @@ saved_models/
 venv
 log
 tmp
+data/plots
+data/csv
+data/out
