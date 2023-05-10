@@ -34,7 +34,7 @@ echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
 # Binary or script to execute
 
 cd $HOME/coinrun/coinrun
-$HOME/venv/bin/python3 -m coinrun.train_agent --run-id eps --num-levels 500 --epsilon-greedy 0.05
+$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id eps --num-levels 500 --epsilon-greedy 0.05
 
 echo "Finished at:     $(date)"
 
