@@ -32,6 +32,8 @@ echo "Starting on:     $(date)"
 echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
 
 # Binary or script to execute
+# load modules
+module load gcc/8.2.0 openblas/0.3.20 python/3.11.2 cuda/11.8.0 cudnn/8.8.1.3 openmpi/4.1.4 qt/5.10.0 pkg-config/0.29.2 zlib/1.2.11
 
 cd $HOME/coinrun/coinrun
 $HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id eps --num-levels 500 --epsilon-greedy 0.05
