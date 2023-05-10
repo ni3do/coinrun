@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job=cr-base
-#SBATCH --time=150:00
+#SBATCH --time=120:00
 #SBATCH --output=/cluster/home/%u/coinrun/log/baseline-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
 #SBATCH --error=/cluster/home/%u/coinrun/log/baseline-16e6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job=coinrun-l2-eps
-#SBATCH --time=150:00
+#SBATCH --job=cr-l2-eps
+#SBATCH --time=120:00
 #SBATCH --output=/cluster/home/%u/coinrun/log/l2-eps-16e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
 #SBATCH --error=/cluster/home/%u/coinrun/log/l2-eps-16e-6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
