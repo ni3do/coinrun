@@ -5,16 +5,17 @@ Train an agent using a PPO2 based on OpenAI Baselines.
 import time
 
 import tensorflow.compat.v1 as tf
-from coinrun.baselines.common import set_global_seeds
 from mpi4py import MPI
 
 import coinrun.main_utils as utils
 from coinrun import policies, ppo2, setup_utils, wrappers
+from coinrun.baselines.common import set_global_seeds
 from coinrun.config import Config
 
 
 def main():
     args = setup_utils.setup_and_load()
+    print("Running with args:\n", args)
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
