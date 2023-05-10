@@ -1,16 +1,14 @@
 import os
-import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 
-for file_name in sorted(os.listdir("data/csv")):
-    if not os.path.exists(f"data/plots/{file_name.split('.')[0]}"):
-        os.makedirs("data/plots/" + file_name.split(".")[0])
+for file_name in sorted(os.listdir("csv")):
+    if not os.path.exists(f"plots/{file_name.split('.')[0]}"):
+        os.makedirs("plots/" + file_name.split(".")[0])
 
-    df = pd.read_csv("data/csv/" + file_name, sep=",")
+    df = pd.read_csv("csv/" + file_name, sep=",")
     print(file_name)
 
     agg_interval = 50
@@ -23,8 +21,8 @@ for file_name in sorted(os.listdir("data/csv")):
             continue
 
         plt.figure(figsize=(10, 6))
-        ax = sns.regplot(x="timestep", y=key, data=df, marker="o", x_bins=bins)
+        ax = sns.regplot(x="timestep", y=key, data=df, marker="o", x_bins=bins, order=3)
         plt.savefig(
-            f"data/plots/{file_name.split('.')[0]}/" + file_name.split(".")[0] + "-" + key + ".png",
+            f"plots/{file_name.split('.')[0]}/" + file_name.split(".")[0] + "-" + key + ".png",
             dpi=600,
         )

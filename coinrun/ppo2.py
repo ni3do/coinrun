@@ -444,7 +444,7 @@ def learn(
             mpi_print("eprew", rew_mean_10)
             mpi_print("fps", fps)
             mpi_print("total_timesteps", update * nbatch)
-            mpi_print([epinfo["r"] for epinfo in epinfobuf10])
+            mpi_print([epinfo["r"] for epinfo in epinfobuf100])
 
             if len(mblossvals):
                 for lossval, lossname in zip(lossvals, model.loss_names):
