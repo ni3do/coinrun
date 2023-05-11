@@ -16,6 +16,10 @@ for file_name in sorted(os.listdir("csv")):
     # agg_df = df.groupby(np.arange(len(df)//2)).mean()
     # print(agg_df)
     for key in df.keys():
+        if os.path.exists(
+            f"plots/{file_name.split('.')[0]}/" + file_name.split(".")[0] + "-" + key + ".png"
+        ):
+            continue
         # timestep,eplenmean,eprew,fps,total_timesteps,policy_loss,value_loss,policy_entropy,approxkl,clipfrac,l2_loss,test_score
         if key in ["Unnamed: 0", "timestep", "eplenmean", "eprw", "fps", "total_timesteps"]:
             continue

@@ -18,11 +18,11 @@ df = pd.DataFrame(
         "test_scores",
     ]
 )
-for file_name in os.listdir("data/out"):
-    if (not file_name.endswith(".out")) or file_name in os.listdir("data/csv"):
+for file_name in os.listdir("out"):
+    if (not file_name.endswith(".out")) or file_name in os.listdir("csv"):
         continue
     print(file_name)
-    with open("log/" + file_name) as f:
+    with open("out/" + file_name) as f:
         lines = f.readlines()
 
         timestep = [line.split(" ")[1] for line in lines if line.startswith("timestep")]
@@ -64,4 +64,4 @@ for file_name in os.listdir("data/out"):
     df = pd.DataFrame(rows)
     df = df.apply(pd.to_numeric, errors="coerce")
     print(df)
-    df.to_csv("data/csv/" + file_name.split(".")[0] + ".csv")
+    df.to_csv("csv/" + file_name.split(".")[0] + ".csv")
