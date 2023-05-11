@@ -2,11 +2,13 @@
 This is a copy of PPO from openai/baselines (https://github.com/openai/baselines/blob/52255beda5f5c8760b0ae1f676aa656bb1a61f80/baselines/ppo2/ppo2.py) with some minor changes.
 """
 
+import datetime
 import time
 from collections import deque
 
 import joblib
 import numpy as np
+import tensorflow as tf2
 import tensorflow.compat.v1 as tf
 from mpi4py import MPI
 
