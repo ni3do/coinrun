@@ -12,7 +12,7 @@ class ConfigSingle(object):
 
     def __init__(self):
         self.WORKDIR = "./saved_models/"
-        self.TB_DIR = "/tmp/tensorflow"
+        self.TB_DIR = "./tensorboard"
         if not os.path.exists(self.WORKDIR):
             os.makedirs(self.WORKDIR, exist_ok=True)
 
@@ -41,18 +41,18 @@ class ConfigSingle(object):
         type_keys.append(("lstm", "use_lstm", int, 0, True))
 
         # The number of parallel environments to run
-        type_keys.append(("ne", "num_envs", int, 32, True))
+        type_keys.append(("ne", "num_envs", int, 64, True))
 
         # The number of levels in the training set.
         # If NUM_LEVELS = 0, the training set is unbounded. All level seeds will be randomly generated.
         # Use SET_SEED = -1 and NUM_LEVELS = 500 to train with the same levels in the paper.
-        type_keys.append(("nlev", "num_levels", int, 0, True))
+        type_keys.append(("nlev", "num_levels", int, 500, True))
 
         # Provided as a seed for training set generation.
         # If SET_SEED = -1, this seed is not used and level seeds with be drawn from the range [0, NUM_LEVELS).
         # Use SET_SEED = -1 and NUM_LEVELS = 500 to train with the same levels in the paper.
         # NOTE: This value must and will be saved, in order to use the same training set for evaluation and/or visualization.
-        type_keys.append(("set-seed", "set_seed", int, -1, True))
+        type_keys.append(("set-seed", "set_seed", int, 7, True))
 
         # PPO Hyperparameters
         type_keys.append(("ns", "num_steps", int, 256))
