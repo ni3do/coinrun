@@ -5,7 +5,7 @@ Load an agent trained with train_agent.py and
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import coinrun.main_utils as utils
 from coinrun import policies, setup_utils, wrappers

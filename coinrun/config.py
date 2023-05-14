@@ -100,7 +100,7 @@ class ConfigSingle(object):
         type_keys.append(("si", "save_interval", int, 10))
 
         # The number of evaluation environments to use
-        type_keys.append(("num-eval", "num_eval", int, 20, True))
+        type_keys.append(("num-eval", "num_eval", int, 20, False))
 
         # The number of episodes to evaluate with each evaluation environment
         type_keys.append(("rep", "rep", int, 1))

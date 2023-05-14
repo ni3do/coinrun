@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --job=cr-base
-#SBATCH --time=20:00
-#SBATCH --output=/cluster/home/%u/coinrun/log/mpi-baseline-32e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=/cluster/home/%u/coinrun/log/mpi-baseline-32e6-%j.err  # where to store error messages
+#SBATCH --time=5:00:00
+#SBATCH --output=/cluster/home/%u/coinrun/log/baseline-32e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/baseline-32e6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=1
-#SBATCH --gpus=rtx_3090:1
+#SBATCH --gpus=v100:1
 #SBATCH --mem-per-cpu=8G
 
 
@@ -40,13 +40,15 @@ cd $HOME/coinrun/coinrun
 # source ../venv/bin/activate
 # mpiexec -np 4 python -m coinrun.train_agent --run-id myrun
 
-$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id test --save-interval 1
-for ((i=0; i <=2; i++))
+$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id baseline --save-interval 1
+for ((i=0; i <=63; i++))
 do
 echo "still running"
-$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id test -num-eval 20 -rep 1
-$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id test --save-interval 1
+$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id baseline -num-eval 50 -rep 1
+$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id baseline --run-id baseline --save-interval 1
 done
+
+$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id baseline -num-eval 50 -rep 1
 
 echo "Finished at:     $(date)"
 
