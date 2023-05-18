@@ -4,7 +4,7 @@ import pandas as pd
 
 df = pd.DataFrame(
     columns=[
-        "timestep",
+        # "timestep",
         "eplenmean",
         "eprewmean",
         "fps",
@@ -26,7 +26,7 @@ for file_name in os.listdir("out"):
     with open("out/" + file_name) as f:
         lines = f.readlines()
 
-        timestep = [line.split(" ")[1] for line in lines if line.startswith("timestep")]
+        # timestep = [line.split(" ")[1] for line in lines if line.startswith("timestep")]
         eplenmean = [line.split(" ")[1] for line in lines if line.startswith("eplenmean")]
         eprew = [line.split(" ")[1] for line in lines if line.startswith("eprew")]
         fps = [line.split(" ")[1] for line in lines if line.startswith("fps")]
@@ -44,15 +44,22 @@ for file_name in os.listdir("out"):
         ]
         test_score = [line.split(" ")[1] for line in lines if line.startswith("mean_score")]
 
+    total_timesteps = [int(t) for t in total_timesteps]
     rows = []
-    for i in range(len(timestep)):
+    multiplier = 0
+    interval = 5e5
+
+    for i in range(len(total_timesteps)):
+        if (i > 0 and total_timesteps[i] < total_timesteps[i - 1]):
+            print(total_timesteps[i], total_timesteps[i - 1])
+            multiplier += 1
         rows.append(
             {
-                "timestep": timestep[i],
+                # "timestep": timestep[i],
                 "eplenmean": eplenmean[i],
                 "eprew": eprew[i],
                 "fps": fps[i],
-                "total_timesteps": total_timesteps[i],
+                "total_timesteps": total_timesteps[i] + multiplier * interval,
                 "policy_loss": policy_loss[i],
                 "value_loss": value_loss[i],
                 "policy_entropy": policy_entropy[i],
@@ -71,7 +78,7 @@ for file_name in os.listdir("out"):
     rows_test = []
     interval = 5e5
     for i in range(len(test_score)):
-        rows_test.append({"timestep": i * interval, "test_score": test_score[i]})
+        rows_test.append({"total_timesteps": i * interval, "test_score": test_score[i]})
     df = pd.DataFrame(rows_test)
     df = df.apply(pd.to_numeric, errors="coerce")
     print(df)
