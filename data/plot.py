@@ -11,7 +11,11 @@ for file_name in sorted(os.listdir("csv")):
     df = pd.read_csv("csv/" + file_name, sep=",")
     print(file_name)
 
-    agg_interval = 50
+    if file_name.endswith("_test.csv"):
+        agg_interval = 1
+    else:
+        agg_interval = 50
+        
     bins = len(df) // agg_interval
     # agg_df = df.groupby(np.arange(len(df)//2)).mean()
     # print(agg_df)

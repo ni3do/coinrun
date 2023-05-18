@@ -19,7 +19,8 @@ df = pd.DataFrame(
     ]
 )
 for file_name in os.listdir("out"):
-    if (not file_name.endswith(".out")) or file_name in os.listdir("csv"):
+    print(file_name[:-3] + "csv")
+    if (not file_name.endswith(".out")) or file_name[:-3] + "csv" in os.listdir("csv"):
         continue
     print(file_name)
     with open("out/" + file_name) as f:
@@ -38,9 +39,10 @@ for file_name in os.listdir("out"):
         approxkl = [line.split(" ")[1] for line in lines if line.startswith("approxkl")]
         clipfrac = [line.split(" ")[1] for line in lines if line.startswith("clipfrac")]
         l2_loss = [line.split(" ")[1] for line in lines if line.startswith("l2_loss")]
-        test_scores = [
+        train_scores = [
             sum(eval(line)) / max(len(eval(line)), 1) for line in lines if line.startswith("[")
         ]
+        test_score = [line.split(" ")[1] for line in lines if line.startswith("mean_score")]
 
     rows = []
     for i in range(len(timestep)):
@@ -57,7 +59,7 @@ for file_name in os.listdir("out"):
                 "approxkl": approxkl[i],
                 "clipfrac": clipfrac[i],
                 "l2_loss": l2_loss[i],
-                "test_score": test_scores[i],
+                "train_score": train_scores[i],
             }
         )
 
@@ -65,3 +67,12 @@ for file_name in os.listdir("out"):
     df = df.apply(pd.to_numeric, errors="coerce")
     print(df)
     df.to_csv("csv/" + file_name.split(".")[0] + ".csv")
+
+    rows_test = []
+    interval = 5e5
+    for i in range(len(test_score)):
+        rows_test.append({"timestep": i * interval, "test_score": test_score[i]})
+    df = pd.DataFrame(rows_test)
+    df = df.apply(pd.to_numeric, errors="coerce")
+    print(df)
+    df.to_csv("csv/" + file_name.split(".")[0] + "_test.csv")
