@@ -1,0 +1,2 @@
+dropout,l2,epsilon,test_score,train_score
+0.01,0.0001,0.01,0.835,0.9
