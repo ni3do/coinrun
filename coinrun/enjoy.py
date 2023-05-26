@@ -19,7 +19,7 @@ def create_act_model(sess, env, nenvs):
     ac_space = env.action_space
 
     policy = policies.get_policy()
-    act = policy(sess, ob_space, ac_space, nenvs, 1, reuse=False)
+    act = policy(sess, ob_space, ac_space, nenvs, 1)
 
     return act
 
