@@ -3,8 +3,8 @@
 #SBATCH --mail-type=ALL                           # mail configuration: NONE, BEGIN, END, FAIL, REQUEUE, ALL
 #SBATCH --job=cr-reg
 #SBATCH --time=12:00:00
-#SBATCH --output=/cluster/home/%u/coinrun/log/reg-32e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
-#SBATCH --error=/cluster/home/%u/coinrun/log/reg-32e6-%j.err  # where to store error messages
+#SBATCH --output=/cluster/home/%u/coinrun/log/reg-128e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
+#SBATCH --error=/cluster/home/%u/coinrun/log/reg-128e6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=6
 #SBATCH --gpus=rtx_3090:1
 #SBATCH --mem-per-cpu=8G
