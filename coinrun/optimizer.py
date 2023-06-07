@@ -1,6 +1,7 @@
 import os
 
 import optuna
+from bayes_opt import BayesianOptimization
 import pandas as pd
 from optuna.samplers import RandomSampler
 
@@ -16,8 +17,22 @@ def create_bash_script(l2, dropout, epsilon):
     with open("scripts/base_1.sh", "r") as f:
         base_1 = f.read()
 
+    try:
+        dropout_stripped = str(dropout).split(".")[1]
+    except IndexError:
+        dropout_stripped = str(dropout)
+    
+    try:
+        l2_stripped = str(l2).split(".")[1]
+    except IndexError:
+        l2_stripped = str(l2)
+    try:
+        epsilon_stripped = str(epsilon).split(".")[1]
+    except IndexError:
+        epsilon_stripped = str(epsilon)
+    
     with open(
-        f"scripts/auto/{str(dropout).split('.')[1]}_{str(l2).split('.')[1]}_{str(epsilon).split('.')[1]}.sh",
+        f"scripts/auto/{dropout_stripped}_{l2_stripped}_{epsilon_stripped}.sh",
         "w",
     ) as f:
         f.write(base_0)
@@ -68,8 +83,6 @@ def objective(trial):
         print(f"New model needed")
         print(f"dropout: {dropout}, l2: {l2}, epsilon: {epsilon}")
         create_bash_script(l2, dropout, epsilon)
-        print(f"Running script")
-
         raise Exception(
             f"New model needed with: dropout: {dropout}, l2: {l2}, epsilon: {epsilon}"
         )
@@ -85,7 +98,49 @@ def objective(trial):
             ]["test_score"].loc[0]
         )
         return test_scores[-1]
+    
+def black_box_function(dropout, l2, epsilon):
+    dropout = round(dropout, 16)
+    l2 = round(l2, 16)
+    epsilon = round(epsilon, 16)
+    
+    df = pd.read_csv("model_stats.csv", dtype={"dropout": float, "l2": float, "epsilon": float, "test_score": float})
 
+    rows = df.loc[(df["l2"] == l2) & (df["dropout"] == dropout) & (df["epsilon"] == epsilon)]
+    if len(rows) == 0:
+        print(f"New model needed")
+        print(f"dropout: {dropout}, l2: {l2}, epsilon: {epsilon}")
+        create_bash_script(l2, dropout, epsilon)
+        raise Exception(f"New model needed with: dropout: {dropout}, l2: {l2}, epsilon: {epsilon}")
 
-study = optuna.create_study(sampler=RandomSampler(1337), direction="maximize")
-study.optimize(objective, n_trials=10)
+    else:
+        print(f"Model already exists")
+        
+        test_scores = eval(
+            df.loc[
+                (df["l2"] == l2)
+                & (df["dropout"] == dropout)
+                & (df["epsilon"] == epsilon)
+            ]["test_score"].loc[0]
+        )
+        return test_scores[-1]
+    
+def run_optuna():
+    study = optuna.create_study(sampler=RandomSampler(1337), direction="maximize")
+    study.optimize(objective, n_trials=10)
+
+def run_bayesian():
+    pbounds = {'dropout': (0.0001, 0.1), 'l2': (0.00001, 0.001), 'epsilon': (0.0001, 0.1)}
+
+    optimizer = BayesianOptimization(
+        f=black_box_function,
+        pbounds=pbounds,
+        random_state=1337,
+    )
+
+    # print(optimizer.max)
+    optimizer.maximize(init_points=0, n_iter=10)
+    
+if __name__ == "__main__":
+    # run_optuna()
+    run_bayesian()
