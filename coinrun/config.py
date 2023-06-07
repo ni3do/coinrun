@@ -100,7 +100,7 @@ class ConfigSingle(object):
         type_keys.append(("si", "save_interval", int, 10))
 
         # The number of evaluation environments to use
-        type_keys.append(("num-eval", "num_eval", int, 20, False))
+        type_keys.append(("num-eval", "num_eval", int, 20, True))
 
         # The number of episodes to evaluate with each evaluation environment
         type_keys.append(("rep", "rep", int, 1))
@@ -168,7 +168,9 @@ class ConfigSingle(object):
         return name.replace("_", "-")
 
     def parse_all_args(self, args):
-        assert isinstance(args, argparse.Namespace), "expected argparse.Namespace object"
+        assert isinstance(
+            args, argparse.Namespace
+        ), "expected argparse.Namespace object"
         update_dict = vars(args)
         self.parse_args_dict(update_dict)
 
