@@ -2,7 +2,7 @@
 
 #SBATCH --mail-type=ALL                           # mail configuration: NONE, BEGIN, END, FAIL, REQUEUE, ALL
 #SBATCH --job=cr-reg
-#SBATCH --time=12:00:00
+#SBATCH --time=16:00:00
 #SBATCH --output=/cluster/home/%u/coinrun/log/reg-128e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
 #SBATCH --error=/cluster/home/%u/coinrun/log/reg-128e6-%j.err  # where to store error messages
 #SBATCH --cpus-per-task=6
@@ -32,6 +32,7 @@ echo "Running on node: $(hostname)"
 echo "In directory:    $(pwd)"
 echo "Starting on:     $(date)"
 echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Starting training for $USER" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
 
 # Binary or script to execute
 # load modules
