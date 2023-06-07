@@ -19,8 +19,5 @@ cp -r $HOME/coinrun/coinrun/saved_models/sav_reg_${dp}_${l_two}_${epsilon}_0 $HO
 
 echo "Finished at:     $(date)"
 
-# discord notification on finish
-bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Finished training for $USER" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
-
 # End the script with exit code 0
 exit 0
