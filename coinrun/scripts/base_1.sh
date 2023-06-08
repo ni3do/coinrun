@@ -7,6 +7,10 @@ do
 echo "Iteration $i"
 $HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_name -num-eval 50 -rep 5
 $HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id $model_name --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
+if [ $i % 32 -eq 0 ]
+then
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Training for $USER at iteration $i" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
+fi
 done
 
 echo "Iteration 128"
