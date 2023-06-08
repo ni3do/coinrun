@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 
-def gather_runs():
-    df = pd.read_csv("csv/model_stats.csv")
+def gather_runs(csv_file_name="grid_stats"):
+    df = pd.read_csv(f"csv/{csv_file_name}.csv")
     for file_name in sorted(os.listdir(f"out")):
         if (not file_name.endswith(".out")) or file_name[:-3] + "csv" in os.listdir(
             "csv"
