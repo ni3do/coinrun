@@ -25,8 +25,8 @@ def gather_runs():
                 if line.startswith("mean_score")
             ]
 
-        l2 = round(float(hyperparameters[0][0]), 16)
-        dropout = round(float(hyperparameters[0][1]), 16)
+        dropout = round(float(hyperparameters[0][0]), 16)
+        l2 = round(float(hyperparameters[0][1]), 16)
         epsilon = round(float(hyperparameters[0][2]), 16)
 
         print(l2, dropout, epsilon)

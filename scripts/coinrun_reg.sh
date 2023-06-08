@@ -1,10 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job=cr-base
-#SBATCH --time=7:00:00
+#SBATCH --mail-type=ALL                           # mail configuration: NONE, BEGIN, END, FAIL, REQUEUE, ALL
+#SBATCH --job=cr-reg
+#SBATCH --time=4:00:00
 #SBATCH --output=/cluster/home/%u/coinrun/log/reg-32e6-%j.out    # where to store the output (%j is the JOBID), subdirectory "log" must exist
 #SBATCH --error=/cluster/home/%u/coinrun/log/reg-32e6-%j.err  # where to store error messages
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=6
 #SBATCH --gpus=rtx_3090:1
 #SBATCH --mem-per-cpu=8G
 
@@ -31,6 +32,8 @@ echo "Running on node: $(hostname)"
 echo "In directory:    $(pwd)"
 echo "Starting on:     $(date)"
 echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
+prior_steps=0
+echo "Prior steps:     ${prior_steps}e6"
 
 # Binary or script to execute
 # load modules
@@ -40,20 +43,29 @@ cd $HOME/coinrun/coinrun
 # source ../venv/bin/activate
 # mpiexec -np 4 python -m coinrun.train_agent --run-id myrun
 dp=0.01
-l_two=0.0001
+l_two=0.001
 epsilon=0.01
 model_name="reg-$dp-$l_two-$epsilon"
 
 
-$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id $model_name --save-interval 1 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
+$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
+
+# $HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id $model_name --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
+
 for ((i=0; i <=63; i++))
 do
-echo "still running"
-$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_name -num-eval 50 -rep 1
-$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id $model_name --run-id $model_name --save-interval 1 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
+echo "Iteration $i"
+$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_name -num-eval 50 -rep 5
+$HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id $model_name --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
 done
 
-$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_name -num-eval 50 -rep 1
+echo "Iteration 64"
+$HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_name -num-eval 50 -rep 5
+
+# echo "Finished training at:     $(date)"
+# total_steps=$(($prior_steps + 32))
+# echo "Making copy of model"
+# cp -r $HOME/coinrun/coinrun/saved_models/sav_reg_${dp}_${L_two}_${epsilon}_0 $HOME/coinrun/models/sav_${model_name}-${total_steps}e6_0
 
 echo "Finished at:     $(date)"
 

@@ -35,8 +35,9 @@ echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
 
 # Binary or script to execute
 # load modules
-module load gcc/8.2.0 openblas/0.3.20 python/3.11.2 cuda/11.8.0 cudnn/8.8.1.3 openmpi/4.1.4 qt/5.10.0 pkg-config/0.29.2 zlib/1.2.11 jq/1.5
+module load gcc/8.2.0 openblas/0.3.20 python/3.11.2 cuda/11.8.0 cudnn/8.8.1.3 openmpi/4.1.4 qt/5.10.0 pkg-config/0.29.2 zlib/1.2.11 jq/1.5 eth_proxy curl
 
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Starting training for $USER" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
 cd $HOME/coinrun/coinrun
 # source ../venv/bin/activate
 # mpiexec -np 4 python -m coinrun.train_agent --run-id myrun
