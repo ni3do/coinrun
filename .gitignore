@@ -11,3 +11,5 @@ data/csv
 data/out
 tensorboard
 coinrun/scripts
+coinrun/mode_stats.csv
+data_presentation
