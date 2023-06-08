@@ -107,7 +107,7 @@ def black_box_function(dropout, l2, epsilon):
 
     df = pd.read_csv(
         "model_stats.csv",
-        dtype={"dropout": float, "l2": float, "epsilon": float, "test_score": float},
+        dtype={"dropout": float, "l2": float, "epsilon": float, "test_score": str},
     )
 
     rows = df.loc[
@@ -157,5 +157,5 @@ def run_bayesian():
 
 
 if __name__ == "__main__":
-    run_optuna()
-    # run_bayesian()
+    # run_optuna()
+    run_bayesian()
