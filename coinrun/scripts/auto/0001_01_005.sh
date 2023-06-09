@@ -37,7 +37,6 @@ echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
 # load modules
 module load gcc/8.2.0 openblas/0.3.20 python/3.11.2 cuda/11.8.0 cudnn/8.8.1.3 openmpi/4.1.4 qt/5.10.0 pkg-config/0.29.2 zlib/1.2.11 jq/1.5 eth_proxy curl
 
-bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Starting training for $USER" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
 cd $HOME/coinrun/coinrun
 # source ../venv/bin/activate
 # mpiexec -np 4 python -m coinrun.train_agent --run-id myrun
@@ -46,6 +45,7 @@ l_two=0.0001
 epsilon=0.005
 model_name="reg-$dp-$l_two-$epsilon"
 echo "hyperparameters: $dp $l_two $epsilon"
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Starting training for $USER" --color 3066993 --field "Date;$(date);false" --field "Jobid;${SLURM_JOB_ID};false" --field "Dropout;$dp;false" --field "l2 reg;$l_two;false" --field "Epsilon;$epsilon;false"
 
 $HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
 
@@ -56,7 +56,7 @@ $HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_
 $HOME/coinrun/venv/bin/python3 -m coinrun.train_agent --restore-id $model_name --run-id $model_name --save-interval 4 -uda 1 -dropout $dp -l2 $l_two -eps $epsilon
 if [ $i % 32 -eq 0 ]
 then
-bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Training for $USER at iteration $i" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Training for $USER at iteration $i" --color 3066993 --field "Date;$(date);false" --field "Jobid;${SLURM_JOB_ID};false" --field "Dropout;$dp;false" --field "l2 reg;$l_two;false" --field "Epsilon;$epsilon;false"
 fi
 done
 
@@ -71,7 +71,7 @@ cp -r $HOME/coinrun/coinrun/saved_models/sav_reg_${dp}_${l_two}_${epsilon}_0 $HO
 echo "Finished at:     $(date)"
 
 # discord notification on finish
-bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Finished training for $USER" --description "$model_name at $(date) with jobid ${SLURM_JOB_ID}" --color 3066993
+bash $HOME/discord-webhook/discord.sh --webhook-url=https://discord.com/api/webhooks/1105789194959339611/-tDqh7eGfQJhaLoxjCsHbHrwTzhNEsR5SDxabXFiYdhg-KHwzN3kVwr87rxUggqWCQ0K --title "Finished training for $USER" --color 3066993 --field "Date;$(date);false" --field "Jobid;${SLURM_JOB_ID};false" --field "Dropout;$dp;false" --field "l2 reg;$l_two;false" --field "Epsilon;$epsilon;false"
 
 # End the script with exit code 0
 exit 0
