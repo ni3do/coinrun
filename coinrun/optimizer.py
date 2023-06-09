@@ -90,14 +90,8 @@ def objective(trial):
     else:
         print(f"Model already exists")
 
-        test_scores = eval(
-            df.loc[
-                (df["l2"] == l2)
-                & (df["dropout"] == dropout)
-                & (df["epsilon"] == epsilon)
-            ]["test_score"].loc[0]
-        )
-        return test_scores[-1]
+        test_scores = rows["test_score"]
+        return test_scores.iloc[-1]
 
 
 def black_box_function(dropout, l2, epsilon):
