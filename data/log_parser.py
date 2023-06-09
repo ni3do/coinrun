@@ -3,15 +3,15 @@ import os
 import pandas as pd
 
 
-def gather_runs(csv_file_name="grid_stats"):
+def gather_runs(csv_file_name="grid_stats", run_type="grid"):
     df = pd.read_csv(f"csv/{csv_file_name}.csv")
-    for file_name in sorted(os.listdir(f"out")):
+    for file_name in sorted(os.listdir(f"out/{run_type}")):
         if (not file_name.endswith(".out")) or file_name[:-3] + "csv" in os.listdir(
             "csv"
         ):
             continue
         print(file_name)
-        with open(f"out/{file_name}") as f:
+        with open(f"out/{run_type}/{file_name}") as f:
             lines = f.readlines()
 
             hyperparameters = [
@@ -46,7 +46,7 @@ def gather_runs(csv_file_name="grid_stats"):
                     df,
                     pd.DataFrame(
                         {
-                            "type": "optuna",
+                            "type": run_type,
                             "dropout": dropout,
                             "l2": l2,
                             "epsilon": epsilon,
@@ -55,8 +55,8 @@ def gather_runs(csv_file_name="grid_stats"):
                     ),
                 ]
             )
-    df.to_csv("csv/model_stats.csv", index=False)
-    df.to_csv("../coinrun/model_stats.csv", index=False)
+    df.to_csv(f"csv/{csv_file_name}.csv", index=False)
+    df.to_csv(f"../coinrun/{csv_file_name}.csv", index=False)
 
 
 gather_runs()
