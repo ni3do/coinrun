@@ -65,8 +65,8 @@ $HOME/coinrun/venv/bin/python3 -m coinrun.enjoy --test-eval --restore-id $model_
 
 echo "Finished training at:     $(date)"
 total_steps=128
-echo "Making copy of model"
-cp -r $HOME/coinrun/coinrun/saved_models/sav_reg_${dp}_${l_two}_${epsilon}_0 $HOME/coinrun/models/sav_${model_name}-${total_steps}e6_0
+# echo "Making copy of model"
+# cp -r $HOME/coinrun/coinrun/saved_models/sav_reg_${dp}_${l_two}_${epsilon}_0 $HOME/coinrun/models/sav_${model_name}-${total_steps}e6_0
 
 echo "Finished at:     $(date)"
 
