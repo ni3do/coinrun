@@ -7,6 +7,7 @@ venv
 log
 tmp
 data/plots
+data/plot
 data/csv
 data/out
 tensorboard
