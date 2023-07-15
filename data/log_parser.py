@@ -59,4 +59,4 @@ def gather_runs(csv_file_name="grid_stats", run_type="grid"):
     df.to_csv(f"../coinrun/{csv_file_name}.csv", index=False)
 
 
-gather_runs()
+gather_runs(csv_file_name="model_stats", run_type="bayes")

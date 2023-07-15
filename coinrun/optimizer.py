@@ -90,8 +90,10 @@ def objective(trial):
     else:
         print(f"Model already exists")
 
-        test_scores = rows["test_score"]
-        return test_scores.iloc[-1]
+        print(rows["test_score"])
+        test_scores = eval(rows["test_score"].iloc[0])
+        last_score = test_scores[len(test_scores) - 1]
+        return last_score
 
 
 def black_box_function(dropout, l2, epsilon):
@@ -151,5 +153,5 @@ def run_bayesian():
 
 
 if __name__ == "__main__":
-    # run_optuna()
-    run_bayesian()
+    run_optuna()
+    # run_bayesian()
